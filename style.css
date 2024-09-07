@@ -1,0 +1,73 @@
+body{
+    background-color: #2a2a2a;
+    font-family: 'Century gothic';
+    color: white;
+}
+
+button{
+    color: darkgray;
+    background-color: black;
+    border-color: gray;
+    border-width: 3px;
+    border-radius: 3px;
+    margin: 2px;
+}
+
+.letter{
+    color: coral;
+}
+
+.picture{
+    height: 500px;
+}
+
+canvas { 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1
+}
+
+.volume-display {
+    position: fixed;
+    bottom: 50px;
+    left: 50px;
+    height: 100px;
+    width: 200px;
+    z-index: 1;
+}
+
+.volume-background {
+    height: 100%;
+    width: 100%;
+    /* border-bottom: 5px solid black; */
+    position: relative; 
+    background-color: black; 
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 
+                       50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: -10px;
+    clip-path: ellipse(50% 100% at 50% 100%);
+}
+.volume-background::after {
+    content: "";
+    height: 95%;
+    width: 95%;
+    margin-bottom: -5px;
+    background: conic-gradient(from 270deg at 50% 100%, 
+                                white 20deg, #ffffbb 20deg 40deg, #ffff88 40deg 60deg,
+                                #ffff66 60deg 80deg, #ffff00 80deg 100deg, #bbee00 100deg 120deg,
+                                #88cc00 120deg 140deg, #44aa00 140deg 160deg, #008800 160deg);
+    clip-path: ellipse(50% 100% at 50% 100%);
+}
+
+.volume-cursor {
+    width: 100%;
+    height: 20px;
+    background: black;
+    clip-path: polygon(0% 50%, 50% 0%, 52% 50%, 50% 100%);
+    transform: rotate(45deg);
+}
