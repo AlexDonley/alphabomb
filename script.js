@@ -8,16 +8,21 @@ let svgNames = ['a_apple.svg', 'b_book.svg', 'c_cat.svg']
 let myDocument = document.documentElement;
 let btn = document.getElementById('btn');
 let volumeCursor = document.getElementById('volumeCursor');
+let volumeDisplay = document.getElementById('volumeDisplay')
 let cumulative = 0;
+let cumulativeCorrect = 0;
 let addToBomb = 0;
-let bombSet = 0;
 let bombSize;
 let threshold = 400;
+let holdover = 0;
+let cumTrans = 0;
+let cumCorTrans = 0;
 
 let pronunciationFeedback = 0;
 let correctSpeech = false;
 let isExploding = false;
 let showData = false;
+let recognizing = false;
 
 let res = 100;
 let proportion = 0.6;
@@ -25,7 +30,7 @@ let boxSide;
 let boxX;
 let boxY;
 
-let mic;
+let mic = false;
 let letterIndex = Math.floor(Math.random(25));
 let abcPics = [];
 
@@ -34,8 +39,10 @@ let bombs = []
 function toggleData() {
     if (showData) {
         showData = false;
+        volumeDisplay.style.display = 'none';
     } else {
         showData = true;
+        volumeDisplay.style.display = 'block';
     }
 }
 
@@ -56,20 +63,15 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
+    let canvas = createCanvas(windowWidth, windowHeight);
     imageMode(CENTER)
+    textAlign(CENTER)
 
     boxSide = Math.round(min(windowWidth, windowHeight) * proportion)
     boxX = (windowWidth - boxSide) / 2;
     boxY = (windowHeight - boxSide) / 2
 
-    // tint(255, 0);
-
     loadNewPic(letterIndex);
-
-    mic = new p5.AudioIn();
-    mic.start();
-    amp = new p5.Amplitude();
 }
 
 function loadNewPic(i){
@@ -105,28 +107,67 @@ function loadNewPic(i){
 
     image(nextPic, width/2, height/2, newW, newH);
 
-    // CORNERS MODE
-
-    // if (imgW == imgH) {
-    //     for corners mode
-    //     image(nextPic, boxX, boxY, boxSide, boxSide);
-    // } else {
-    //     if (imgW > imgH) {
-    //         for corners mode
-    //         image(nextPic, boxX, boxY + (boxSide - (boxSide / aspect)) / 2, boxSide, boxSide * (1 / aspect));
-    //     } else {
-    //         for corners mode
-    //         image(nextPic, boxX + (boxSide - (boxSide * aspect)) / 2, boxY, boxSide * aspect, boxSide);
-    //     }
-    // }
-    
-    // abcPics[letterIndex].loadPixels();
 }
 
 function draw() {
     clear();
 
     tint(255);
+    strokeWeight(0);
+
+    // DATA CALCULATIONS
+
+    if (mic) {
+        rawMic = mic.getLevel()
+    } else {
+        rawMic = 0
+    }
+
+    currentVol = rawMic * 36;
+    volumeMap = Math.round(currentVol) * 10
+
+    if (volumeMap > 180) {
+        volumeMap = 180;
+    }
+
+    cumulative += volumeMap / 10
+    targ = max(cumulative, cumulativeCorrect)
+
+    if (!(addToBomb == targ)) {
+        addToBomb += (targ - addToBomb) / 25
+    }
+
+    tick = sin(new Date().getMilliseconds() * (addToBomb / 200) / 100 * HALF_PI) * 10
+    bombSize = 100 + addToBomb + tick
+
+    if (!(cumTrans == cumulative)) {
+        cumTrans += (cumulative - cumTrans) / 25
+    }
+    if (!(cumCorTrans == cumulativeCorrect)) {
+        cumCorTrans += (cumulativeCorrect - cumCorTrans) / 25
+    }
+
+    // TEXT TO SEE DATA IN THE CANVAS
+
+    if(showData) {
+        textSize(100);
+        fill(255);
+        text(cumulative, 100, 400);
+        text(cumulativeCorrect, 100, 500);
+        textSize(20);
+        text(userUtterance, 100, 550)
+        volumeCursor.style.transform = 'rotate(' + volumeMap + "deg)"
+    }
+    
+
+    centerH = (height - boxSide) / 2
+    centerW = (width - boxSide) / 2
+
+    fill(128, 128, 255)
+    rect(centerW - 175, centerH, 120, boxSide, 15)
+    fill(0, 255, 0)
+    rect(centerW - 160, height - centerH - 15, 90, -boxSide * (cumCorTrans) / threshold, 15)
+
     if (pronunciationFeedback > 0){
         if(correctSpeech) {
             fill(0, 255, 0)
@@ -137,62 +178,17 @@ function draw() {
     } else {
         fill(255);
     }
+
     textSize(200);
-    text(nouns[letterIndex], 100, 250);
+    text(nouns[letterIndex], width/2, 200);
     loadNewPic(letterIndex);
+    rect(centerW - 160, height - centerH - 15, 90, -boxSide * (cumTrans) / threshold, 15)
 
-    // for (let i=0; i < abcPics[letterIndex].width; i+=res) {
-    //     for (let j=0; j < abcPics[letterIndex].height; j+=res) {
-    //         let c = (abcPics[letterIndex].get(i,j));
-    //         fill(c);
-    //         noStroke();
-    //         rect(i * propWidth,j * propHeight,res,res)
-    //     }
-    // }
-    // if (res > 5) {
-    //     res -= Math.round(currentVol) / 3.6;
-    //     if (res < 1) {
-    //         res = 1
-    //     }
-    // }
-    
-    // centerpoint check
-    // ellipse(width/2, height/2, 6, 6)
-
-    currentVol = mic.getLevel() * 36
-
-    volumeMap = Math.round(currentVol) * 10
-
-    if (volumeMap > 180) {
-        volumeMap = 180;
-    }
-
-    cumulative += volumeMap / 10
-
-    if(showData) {
-        textSize(100);
-        fill(255);
-        text(cumulative, 100, 400);
-        text(bombSet, 100, 500);
-        textSize(20);
-        text(userUtterance, 100, 550)
-    }
-    
-    volumeCursor.style.transform = 'rotate(' + volumeMap + "deg)"
-
-    if (!(addToBomb == bombSet)) {
-        addToBomb += (bombSet - addToBomb) / 25
-    }
-
-
-    tick = sin(new Date().getMilliseconds() * (addToBomb / 200) / 100 * PI) * 10
-    bombSize = 100 + addToBomb + tick
-    
 
     tint(255, 255 - addToBomb, 255 - addToBomb)
     image(bombs[0], (width + boxSide) / 2, (height + boxSide) / 2, bombSize, bombSize)
 
-    if (bombSet > threshold && !isExploding) {
+    if (cumulativeCorrect > threshold && !isExploding) {
         explodeItem();
         isExploding = true;
     }
@@ -202,7 +198,7 @@ function explodeItem() {
     setTimeout(() => {
         explosion.play();
         cumulative = 0;
-        bombSet = 0;
+        cumulativeCorrect = 0;
         pronunciationFeedback = 0;
         nextLetter();
         isExploding = false;
@@ -325,18 +321,17 @@ setLanguage('en');
 
 recognition.addEventListener("result", (e) => {
   
+    if (holdover > 0) {
+        holdover = 0;
+    }
+    if (pronunciationFeedback > 0) {
+        pronunciationFeedback = 0;
+    }
+
   const text = Array.from(e.results)
     .map((result) => result[0])
     .map((result) => result.transcript)
     .join("");
-
-    // console.log(e.results)
-
-    //   if (targetLang == 'zh') {
-    //     userUtterance = omitPunctuation(text).toLowerCase().split('');
-    //   } else {
-    //     userUtterance = omitPunctuation(text).toLowerCase().split(' ');
-    //   }
 
     userUtterance = text;
 
@@ -356,25 +351,30 @@ recognition.addEventListener("end", () => {
 
 function checkSpeech(str) {
     if (str.toLowerCase().includes(nouns[letterIndex])) {
-        bombSet += cumulative;
+        cumulativeCorrect += cumulative;
         correctSpeech = true;
     } else {
         correctSpeech = false;
     }
     pronunciationFeedback = 200;
+    holdover = cumulative;
     cumulative = 0;
 }
 
 function beginAudioContext() {
     mic = new p5.AudioIn();
     mic.start();
-    amp = new p5.Amplitude();
+    // amp = new p5.Amplitude();
+    getAudioContext().resume();
     console.log(Math.ceil(mic.getLevel() * 100))
 }
 
 function beginRecognition() {
     cumulative = 0;
-    recognition.start()
+    if (!recognizing) {
+        recognizing = true;
+        recognition.start()
+    }
 }
 
-beginRecognition();
+// beginRecognition();
