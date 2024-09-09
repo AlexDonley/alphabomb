@@ -22,15 +22,14 @@
     <script language="javascript" src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/addons/p5.sound.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-    <title>Document</title>
+    <title>Alphabomb</title>
 </head>
 <body>
-        <div id="sign"></div>
-        <div id="userSpeech"></div>
+    <div class="button-menu">
         <button id="btn" onclick="toggleFullscreen()">Go Fullscreen</button> <br>
-        <button id="audStart" onclick="beginAudioContext()">Start Audio</button> <br>
-        <button id="micStart" onclick="beginRecognition()">Start Recognition</button> <br>
-        <button id="toggleData" onclick="toggleData()">Toggle Data</button>
+        <button id="toggleData" onclick="toggleData()">Toggle Data</button> <br>
+        <button id="audStart" onclick="beginAudioContext(), beginRecognition()">Start Audio & Recognition</button>
+    </div>
     <div class="volume-display" id="volumeDisplay">
         <div class="volume-background" id="volumeBackground">
 
