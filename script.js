@@ -141,10 +141,10 @@ function draw() {
     bombSize = 100 + addToBomb + tick
 
     if (!(cumTrans == cumulative)) {
-        cumTrans += (cumulative - cumTrans) / 25
+        cumTrans += (cumulative - cumTrans) / 15
     }
     if (!(cumCorTrans == cumulativeCorrect)) {
-        cumCorTrans += (cumulativeCorrect - cumCorTrans) / 25
+        cumCorTrans += (cumulativeCorrect - cumCorTrans) / 15
     }
 
     // TEXT TO SEE DATA IN THE CANVAS
@@ -166,7 +166,7 @@ function draw() {
     fill(128, 128, 255)
     rect(centerW - 175, centerH, 120, boxSide, 15)
     fill(0, 255, 0)
-    rect(centerW - 160, height - centerH - 15, 90, -boxSide * (cumCorTrans) / threshold, 15)
+    rect(centerW - 160, height - centerH - 15, 90, -boxSide * (cumCorTrans) / threshold, 7)
 
     if (pronunciationFeedback > 0){
         if(correctSpeech) {
@@ -182,7 +182,7 @@ function draw() {
     textSize(200);
     text(nouns[letterIndex], width/2, 200);
     loadNewPic(letterIndex);
-    rect(centerW - 160, height - centerH - 15, 90, -boxSide * (cumTrans) / threshold, 15)
+    rect(centerW - 160, height - centerH - (boxSide * (cumCorTrans) / threshold) - 20, 90, -boxSide * (cumTrans) / threshold, 7)
 
 
     tint(255, 255 - addToBomb, 255 - addToBomb)
