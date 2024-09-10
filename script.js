@@ -137,7 +137,7 @@ function draw() {
         addToBomb += (targ - addToBomb) / 25
     }
 
-    tick = sin(new Date().getMilliseconds() * (addToBomb / 200) / 100 * HALF_PI) * 10
+    tick = cos(new Date().getMilliseconds() * TWO_PI * addToBomb / 100000) * 10
     bombSize = 100 + addToBomb + tick
 
     if (!(cumTrans == cumulative)) {
